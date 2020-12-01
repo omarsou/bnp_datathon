@@ -15,11 +15,11 @@ class WinnersFillingFormErrors(BaseException):
 
 class WinnersFillingForm:
     def __init__(self, code_country, modelQA, modelIR, modelNER=None, k=10):
-        self.code_country = code_country ## Code of the country
-        self.modelQA = modelQA ## MODEL FOR QUESTION ASNWERING
-        self.modelIR = modelIR ## MODEL FOR RANKING
-        self.modelNER = modelNER ## Model NER if we need it
-        self.topk = k ## TOP K paragraph to inspect
+        self.code_country = code_country  # Code of the country
+        self.modelQA = modelQA  # MODEL FOR QUESTION ASNWERING
+        self.modelIR = modelIR  # MODEL FOR RANKING
+        self.modelNER = modelNER  # Model NER if we need it
+        self.topk = k  # TOP K paragraph to inspect
 
     def answer(self, text):
         chunks = self.split_text(text)
@@ -41,11 +41,11 @@ class WinnersFillingForm:
 
     def split_text(self, text):
         # TO DO : HOW ARE WE GOING TO SPLIT OUR TEXT IN SEVERAL CHUNKS ?
-        pass
+        return None
 
     def find_topk_paragraphs(self,  chunks, question):
         # TO DO : HOW ARE WE GOING TO FIND THE BEST PARAGRAPHS
-        pass
+        return None
 
     def answer_question_bool(self, chunks, i):
         # TO DO : HOW ARE WE GOING TO ANSWER QUESTIONS WITH BOOLEAN
@@ -53,14 +53,15 @@ class WinnersFillingForm:
         candidates = self.find_topk_paragraphs(chunks, question)
         # TO DO
         # TO DO
+        answer_id = 1
         if answer_id == 0 and i in IGNORE_START:
             id_questions_to_ignore = IGNORE_NEXT[i]
             answers_sheet = [{'answer_id': answer_id, 'question_id': j} for j in id_questions_to_ignore]
-            steps = len(id_questions_to_ignore) - 1
+            steps = len(id_questions_to_ignore)
         else:
             answers_sheet = [{'answer_id': answer_id, 'question_id': i}]
             steps = 1
-        return answers_sheet, i
+        return answers_sheet, steps
 
     def answer_question_country(self, chunks, i):
         # TO DO : HOW ARE WE GOING TO ANSWER QUESTION COUNTRY
@@ -69,8 +70,11 @@ class WinnersFillingForm:
         countries_expected = CountryQuestions.questions_to_id[question]
         # TO DO
         # TO DO
-        countries_id = sorted(countries_id) + [0]*(len(countries_id) - len(countries_expected))
-        return [{'answer_id': answer_id, 'question_id': i} for answer_id, i in zip(countries_id, countries_expected)]
+        countries_id = [840]
+
+        countries_id = list(sorted(countries_id)) + [0]*(len(countries_expected) - len(countries_id))
+        return [{'answer_id': answer_id, 'question_id': i} for answer_id, i in zip(countries_id, countries_expected)], \
+               len(countries_expected)
 
     def answer_question_special(self, chunks, i):
         # TO DO : HOW ARE WE GOING TO ANSWER SPECIAL QUESTION
@@ -78,4 +82,5 @@ class WinnersFillingForm:
         candidates = self.find_topk_paragraphs(chunks, question)
         # TO DO
         # TO DO
-        return [{'answer_id': answer_id, 'question_id': i}]
+        answer_id = 1
+        return [{'answer_id': answer_id, 'question_id': i}], 1

@@ -9,6 +9,7 @@ __pycache__/
 # STUFF
 .DS_Store
 .idea/
+data/
 
 # Distribution / packaging
 .Python
