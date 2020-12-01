@@ -24,7 +24,7 @@ class CountryQuestions:
                                                                                                                    19,
                                                                                                                    20],
                        }
-    id_to_questions = {v: k for k, v in questions_to_id.items()}
+    id_to_questions = {v[0]: k for k, v in questions_to_id.items()}
 
 
 class SpecialQuestions:
