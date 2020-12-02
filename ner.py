@@ -37,6 +37,7 @@ def extract_country(sentence, countries_code):
 
     ### let's see what the NER discovers new ###
     ner = nlp(sentence)
+    if len(ner) == 0: return selected_countries
     location_criteria = lambda entity : 'LOC' in entity
     df = DataFrame(ner); df = df[df['entity'].apply(location_criteria)]; df = df[df['word'] != '.']; df = df[df['score'] >= 0.8]
     extracted_countries = extract_country_names(df)
