@@ -51,9 +51,9 @@ def extract_country(sentence, countries_code):
         elif len(country) == 3:
             country_id = countries_code[countries_code['alpha3'] == country.lower()]['id'].values
             if len(country_id) != 0 and country_id[0] not in selected_countries:
-                selected_countries.append(country_id)
+                selected_countries.append(country_id[0])
         elif len(country) == 2:
             country_id = countries_code[countries_code['alpha2'] == country.lower()]['id'].values
             if len(country_id) != 0 and country_id[0] not in selected_countries:
-                selected_countries.append(country_id)
+                selected_countries.append(country_id[0])
     return selected_countries
