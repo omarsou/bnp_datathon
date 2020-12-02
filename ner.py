@@ -46,7 +46,7 @@ def extract_country(sentence, countries_code):
         if country == 'svk826': # cas particulier
             selected_countries.append(703)
         elif country == ' kr': # cas particulier
-            selected_countries.append(703)
+            selected_countries.append(410)
         elif len(country) == 3:
             country_id = countries_code[countries_code['alpha3'] == country.lower()]['id'].values[0]
             if country_id not in selected_countries:
