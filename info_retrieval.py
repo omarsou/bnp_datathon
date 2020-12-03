@@ -49,6 +49,25 @@ class WinnersFillingForm:
 
     def answer_question_bool(self, chunks, i):
         # TO DO : HOW ARE WE GOING TO ANSWER QUESTIONS WITH BOOLEAN
+        if i ==2:
+          key_words = compile('iso27001|iso 27001')
+          found = 0
+          for chunk in chunks:
+            if key_words.search(chunk.lower()):  
+                found = 1
+                # chunk = justification
+        return [{'answer_id': found, 'question_id': i}],1
+
+        if i ==13:
+          key_words = compile('data processing agreement|data protection agreement|dpa|data protection addendum|data processing agreement')
+          found = 0
+          for chunk in chunks:
+            if key_words.search(chunk.lower()):  
+                found = 1
+                # chunk = justification
+        return [{'answer_id': found, 'question_id': i}],1
+
+
         question = BoolQuestions.id_to_questions[i]
         candidates = self.find_topk_paragraphs(chunks, question)
         # TO DO
