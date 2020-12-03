@@ -14,10 +14,10 @@ def extract_country_names(dataframe):
     dataframe['index_diff'] = dataframe['index'].diff()
     dataframe['label'] = 0; label = 0
     for i in range(dataframe.shape[0]):
-        if dataframe[i:i+1]['index_diff'].values[0] <= 2:
+        if dataframe[i:i+1]['index_diff'].values[0] <= 2 and dataframe[i:i+1]['entity'].values[0] == 'I-LOC':
             dataframe.loc[dataframe.index[i], 'label'] = label
             if len(dataframe[i-1:i]['word'].values[0]) > 3:
-                dataframe.loc[dataframe.index[i-1], 'word'] += ' '
+                dataframe.loc[dataframe.index[i-1], 'word'] = ' ' + dataframe.loc[dataframe.index[i-1], 'word']
         else:
             label += 1
             dataframe.loc[dataframe.index[i], 'label'] = label
