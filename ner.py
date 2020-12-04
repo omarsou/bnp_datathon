@@ -52,16 +52,4 @@ def extract_country(sentence, countries_code):
             if 840 not in selected_countries:
                 selected_countries.append(840)
                 break
-        # if country == 'svk826': # cas particulier
-        #     selected_countries.append(703)
-        # elif country == ' kr': # cas particulier
-        #     selected_countries.append(410)
-        # if len(country) == 3 and country.lower() == 'usa':
-            # country_id = countries_code[countries_code['alpha3'] == country.lower()]['id'].values
-            # if len(country_id) != 0 and country_id[0] not in selected_countries:
-            #     selected_countries.append(country_id[0])
-        # if len(country) == 2 and country.lower() == 'us':
-        #     country_id = countries_code[countries_code['alpha2'] == country.lower()]['id'].values
-        #     if len(country_id) != 0 and country_id[0] not in selected_countries:
-        #         selected_countries.append(country_id[0])
     return selected_countries
