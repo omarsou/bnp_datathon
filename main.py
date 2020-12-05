@@ -1,22 +1,26 @@
 import os
-from answer_question import QuestionAnswering
-from extract_ner import Extractor
-from match_nationality_country import MatchCountryFromNationality
+#from answer_question import QuestionAnswering
+#from extract_ner import Extractor
+from extract_ner_v2 import Extractor
+#from match_nationality_country import MatchCountryFromNationality
+from match_nationality_country_v2 import MatchCountryFromNationality
 import pandas as pd
 import json
-from info_retrieval_v2 import WinnersFillingForm
-from transformers import pipeline, AlbertTokenizer, AlbertForQuestionAnswering, AutoTokenizer, \
-    AutoModelForTokenClassification
+from info_retrieval_v5 import WinnersFillingForm
+#from transformers import pipeline, AlbertTokenizer, AlbertForQuestionAnswering, AutoTokenizer, \
+    #AutoModelForTokenClassification
+import spacy
 from rank_bm25 import BM25Okapi
 
 ## MODEL NER ##
-tokenizer_ner = AutoTokenizer.from_pretrained("/apps/models/bert_base_ner") # to modify
-model_ner = AutoModelForTokenClassification.from_pretrained("/apps/models/bert_base_ner") # to modify
+#tokenizer_ner = AutoTokenizer.from_pretrained("/apps/models/bert_base_ner") # to modify
+#model_ner = AutoModelForTokenClassification.from_pretrained("/apps/models/bert_base_ner") # to modify
 
 ## MODEL QUESTION ANSWERING ##
-tokenizer_qa = AlbertTokenizer.from_pretrained('smalbert/')
-model_qa = AlbertForQuestionAnswering.from_pretrained('smalbert/')
-pip_ner = pipeline("ner", model=model_ner, tokenizer=tokenizer_ner)
+#tokenizer_qa = AlbertTokenizer.from_pretrained('smalbert/')
+#model_qa = AlbertForQuestionAnswering.from_pretrained('smalbert/')
+#pip_ner = pipeline("ner", model=model_ner, tokenizer=tokenizer_ner)
+pip_ner = spacy.load('/apps/models/ner_spacy_en')
 
 countries_codes = pd.read_csv('countries_code.csv')  # Codes of the countries
 citizens_data = pd.read_excel('citizens.xlsx')
@@ -27,12 +31,12 @@ match_nat = MatchCountryFromNationality(citizens_data, countries_codes)
 countries_codes = pd.read_csv('countries_code.csv')  # Codes of the countries
 
 # INITIALISATION of the Extractor (NER) / Question Answering
-country_extractor = Extractor(pip_ner, countries_codes)
-answer_question = QuestionAnswering(tokenizer_qa, model_qa)
-
+extractor = Extractor(pip_ner, countries_codes)
+#answer_question = QuestionAnswering(tokenizer_qa, model_qa)
+answer_question = None
 # BM25 FOR PARAGRAPH RANKING
 bm25 = json.load(open("tokensBM25", "r"))
-bm25 = {k: BM25Okapi(v) for k,v in bm25.items()}
+bm25 = {k: BM25Okapi(v) for k, v in bm25.items()}
 
 
 #### PATH TO THE DOCUMENTS ####
@@ -41,7 +45,7 @@ path_to_files = [os.path.join(documents_directory, file) for file in os.listdir(
 assert len(path_to_files) == 10
 path_to_files.sort()  # SORT AS IT IS ESSENTIAL (ASKIP)
 
-bnp_pipeline = WinnersFillingForm(answer_question, bm25,  country_extractor, match_nat)
+bnp_pipeline = WinnersFillingForm(answer_question, bm25,  extractor, match_nat)
 
 
 def main():

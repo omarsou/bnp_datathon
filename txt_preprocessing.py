@@ -1,7 +1,6 @@
 import nltk
-nltk.download('stopwords')
-import re
 from stopwords import english_stopwords
+import re
 from nltk.stem import PorterStemmer
 
 ps = PorterStemmer()
