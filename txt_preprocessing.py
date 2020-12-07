@@ -7,6 +7,7 @@ ps = PorterStemmer()
 
 
 def strip_characters(text):
+    """Strip characters in text."""
     t = re.sub('\(|\)|:|,|;|\.|’|”|“|\?|%|>|<', '', text)
     t = re.sub('/', ' ', t)
     t = t.replace("'", '')
@@ -14,6 +15,7 @@ def strip_characters(text):
 
 
 def clean(text):
+    """Lower, strip and stem word in text"""
     t = text.lower()
     t = strip_characters(t)
     t = ps.stem(t)
@@ -21,6 +23,7 @@ def clean(text):
 
 
 def tokenize(text):
+    """Tokenize text into words and keep only some words."""
     words = nltk.word_tokenize(text)
     return list(set([word for word in words
                      if len(word) > 1
@@ -31,6 +34,7 @@ def tokenize(text):
 
 
 def preprocess(text):
+    """Clean & tokenize."""
     t = clean(text)
     tokens = tokenize(t)
     return tokens

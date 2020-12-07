@@ -103,8 +103,9 @@ class WinnersFillingForm:
     def answer_question_1(self, chunks, preprocess_chunks):
         bm25 = BM25Okapi(preprocess_chunks)
         doc_scores = bm25.get_scores(preprocess('Personal Data Privacy Policy Collect Protect'))
+        best_doc = sorted(range(len(doc_scores)), reverse=True, key=lambda i: doc_scores[i])[0]
         ans = int(max(doc_scores) > 0.1)
-        return [{'answer_id': ans, 'question_id': 1}]
+        return [{'answer_id': ans, 'question_id': 1, 'justification': chunks[best_doc] if ans else None}]
 
     def answer_questions_3_to_7(self, chunks, preprocess_chunks):
         bm25 = BM25Okapi(preprocess_chunks)
@@ -118,26 +119,29 @@ class WinnersFillingForm:
     def answer_questions_3_to_7_(self, candidat1, candidat2):
         questions_ids = [3, 4, 5, 6, 7]
         answers_ids = [0, 0]
+        justification = candidat1
         code_country = list(set(self.extractor.extract(candidat2) + self.extractor.extract(candidat1)))
         outside_europe = [id_ for id_ in code_country if id_ not in lst_code_europe]
         i = len(outside_europe)
         if self.is_8_positive or i >= 1 or is_transfer.search(candidat1) or is_transfer.search(candidat2):
             answers_ids = [1, 1 * (len(code_country) - 1 > 0)]
         answers_ids = answers_ids + outside_europe[:3] + [0] * (3 - len(outside_europe[:3]))
-        return self.generate_dict_answer(answers_ids, questions_ids)
+        return self.generate_dict_answer(answers_ids, questions_ids, [justification]*5)
 
     def answer_questions_2_8_13(self, chunks):
         l = []
         for question_id in keywords.keys():
             query = compile(keywords[question_id])
             found = 0
+            justification = ''
             for chunk in chunks:
                 if query.search(chunk.lower()):
                     found = 1
+                    justification = chunk
                     if question_id == 8:
                         self.is_8_positive = True
                     break
-            l += [{'answer_id': found, 'question_id': question_id}]
+            l += [{'answer_id': found, 'question_id': question_id, 'justification': justification}]
         return l
 
     def answer_questions_9_10(self, chunks, preprocess_chunks):
@@ -152,18 +156,21 @@ class WinnersFillingForm:
     def answer_question_9(self, candidates):
         question_id = [9, 10]
         answer_id = [0, 0]
+        justification = candidates[0]
         for candidate in candidates:
             if 'law' in candidate.lower():
                 code_country = self.extractor.extract(candidate)
                 if len(code_country) > 0:
                     answer_id = code_country[:2] + [0] * (2 - len(code_country[:2]))
+                    justification = candidate
                     break
                 else:
                     code_country = self.match_nat.match_country(candidate)
                     if len(code_country) > 0:
                         answer_id = code_country + [0]
+                        justification = candidate
                         break
-        return self.generate_dict_answer(answer_id, question_id)
+        return self.generate_dict_answer(answer_id, question_id, [justification]*2)
 
     def answer_questions_11_12(self, chunks, preprocess_chunks):
         bm25 = BM25Okapi(preprocess_chunks)
@@ -178,16 +185,18 @@ class WinnersFillingForm:
         question_id = [11, 12]
         code_country = self.extractor.extract(candidate)
         answer_id = code_country[:2] + [0] * (2 - len(code_country[:2]))
-        return self.generate_dict_answer(answer_id, question_id)
+        return self.generate_dict_answer(answer_id, question_id, [candidate]*2)
 
     def answer_question_14(self, chunks, preprocess_chunks):
         question_id = 14
         answer_id = 0
+        justification = ''
         for chunk in chunks:
             if any(all(x in chunk.lower() for x in reg) for reg in is_payment):
                 answer_id = 1
+                justification = chunk
                 break
-        return [{'answer_id': answer_id, 'question_id': question_id}]
+        return [{'answer_id': answer_id, 'question_id': question_id, 'justification': justification}]
 
     def answer_questions_15_16(self, chunks, preprocess_chunks):
         bm25 = BM25Okapi(preprocess_chunks)
@@ -201,12 +210,13 @@ class WinnersFillingForm:
     def answer_question_15_16_(self, candidates, is_shared=False):
         answer_id = [1*is_shared, 0]
         question_id = [15, 16]
-        #question = "Why share data ?"
+        justification1, justification2 = candidates[0], ''
         for candidate in candidates:
             if any(all(x in candidate.lower() for x in reg) for reg in why_share_date):
                 answer_id = [1, 1]
+                justification2 = candidate
                 break
-        return self.generate_dict_answer(answer_id, question_id)
+        return self.generate_dict_answer(answer_id, question_id, [justification1, justification2])
 
     def answer_questions_17_20(self, text):
         chunks = self.split_text(text[int(len(text)*0.75):], sep='\n')
@@ -229,7 +239,7 @@ class WinnersFillingForm:
         extracted_elem = self.extractor.extract(candidate, type='all')
         if len(extracted_elem['companies']) > 0:
             answer_id = [1] + extracted_elem['countries'][:3] + [0]*(3 - len(extracted_elem['countries'][:3]))
-        return self.generate_dict_answer(answer_id, question_id)
+        return self.generate_dict_answer(answer_id, question_id, [candidate]*4)
 
     def answer_question_21(self, chunks, preprocess_chunks):
         bm25 = BM25Okapi(preprocess_chunks)
@@ -243,11 +253,13 @@ class WinnersFillingForm:
     def answer_question_21_(self, candidates):
         answer_id = 0
         question_id = 21
+        justification = candidates[0]
         for candidate in candidates:
             if 'audit' in candidate.lower():
                 answer_id = 1
+                justification = candidate
                 break
-        return [{'answer_id': answer_id, 'question_id': question_id}]
+        return [{'answer_id': answer_id, 'question_id': question_id, 'justification': justification}]
 
     def answer_question_22(self, chunks, preprocess_chunks):
         bm25 = BM25Okapi(preprocess_chunks)
@@ -259,17 +271,17 @@ class WinnersFillingForm:
     def answer_question_22_(self, candidates):
         answer_id = 0
         question_id = 22
-        js = ''
+        justification = ''
         for candidate in candidates:
             if any(all(x in candidate.lower() for x in reg) for reg in keep_is_only_mentioned):
-                answer_id, js = 1, candidate
+                answer_id, justification = 1, candidate
                 break
             if any(all(x in candidate.lower() for x in reg) for reg in keep_is_mentioned):
-                answer_id, js = 1, candidate
+                answer_id, justification = 1, candidate
                 if self.is_duration_in_string(candidate):
                     answer_id = 2
                     break
-        return [{'answer_id': answer_id, 'question_id': question_id}]
+        return [{'answer_id': answer_id, 'question_id': question_id, 'justification': justification}]
 
     @staticmethod
     def is_duration_in_string(txt):
@@ -279,7 +291,7 @@ class WinnersFillingForm:
         return False
 
     @staticmethod
-    def generate_dict_answer(answer_ids, question_ids):
+    def generate_dict_answer(answer_ids, question_ids, justifications):
         """Generate a list of dict.
         Parameters
         ----------
@@ -289,17 +301,22 @@ class WinnersFillingForm:
         question_ids : array like (shape=(n,)) where n is the number of question
                        list of questions' id
 
+        justifications : array like (shape=(n,)) where n is the number of question
+                         list of justification
+
         Return
         ------
         sheet : array like (shape=(n,))
 
         Examples
         -------
-        >>>answer_ids, questions_ids = [1,2], [20,21]
+        >>>answer_ids, questions_ids, justifications = [1,2], [20,21], ['test', 'test1']
         >>>generate_dict_answer(answer_ids, questions_ids)
-        >>>[{'answer_id': 1, 'question_id': 20}, {'answer_id': 2, 'question_id': 21}]
+        >>>[{'answer_id': 1, 'question_id': 20, 'justification': 'test'}, {'answer_id': 2, 'question_id': 21,
+        >>> 'justifiation': 'test1'}]
         """
-        return [{'answer_id': i, 'question_id': j} for i, j in zip(answer_ids, question_ids)]
+        return [{'answer_id': i, 'question_id': j, 'justification': k} for i, j, k in zip(answer_ids, question_ids,
+                                                                                          justifications)]
 
     @staticmethod
     def split_text(text, threshold=300, sep='\n\n'):
